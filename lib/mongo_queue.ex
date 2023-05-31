@@ -285,15 +285,13 @@ defmodule MongoQueue do
   def ack(%Config{} = config, acks, opts) when is_list(acks) do
     config = Config.merge(config, opts)
 
-    ack_count = length(acks)
-
     query = %{ack: %{"$in" => acks}, visible: %{"$gt" => DateTime.utc_now()}, deleted: nil}
 
     update = %{
       "$set" => %{deleted: DateTime.utc_now()}
     }
 
-    with {:ok, %Mongo.UpdateResult{modified_count: ^ack_count}} <-
+    with {:ok, %Mongo.UpdateResult{}} <-
            Mongo.update_many(config.conn, config.collection, query, update) do
       :ok
     end
