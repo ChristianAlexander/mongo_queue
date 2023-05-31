@@ -4,9 +4,9 @@ defmodule MongoQueue do
 
   Inspired by the [NPM mongodb-queue package](https://www.npmjs.com/package/mongodb-queue).
 
-  # Getting Started
+  ## Getting Started
 
-  ## Config
+  ### Config
 
   To use MongoQueue, you must first create a queue configuration.
   This configuration requires a connection to a MongoDB database, and the name of the collection to use for the queue.
@@ -27,7 +27,7 @@ defmodule MongoQueue do
 
   Configuration options are described in detail in the `MongoQueue.Config` module.
 
-  ## Creating Indexes
+  ### Creating Indexes
 
   To ensure high performance for the queue, you create indexes on the queue collection.
   This only needs to be run once per queue.
@@ -36,7 +36,7 @@ defmodule MongoQueue do
   :ok = MongoQueue.create_indexes(config)
   ```
 
-  ## Adding Messages
+  ### Adding Messages
 
   To add a message to the queue, use the `add/2` function:
 
@@ -44,7 +44,7 @@ defmodule MongoQueue do
   {:ok, message_id} = MongoQueue.add(config, %{foo: "bar"})
   ```
 
-  ## Receiving Messages
+  ### Receiving Messages
 
   To receive a message from the queue, use the `get/1` function:
 
@@ -61,7 +61,7 @@ defmodule MongoQueue do
   {:ok, message} = MongoQueue.get(config, visibility_timeout: 60)
   ```
 
-  ## Acknowledging Messages
+  ### Acknowledging Messages
 
   When the message has finished processing, call the `ack/2` function:
 
@@ -69,9 +69,9 @@ defmodule MongoQueue do
   :ok = MongoQueue.ack(config, message.ack)
   ```
 
-  # Working with multiple messages at once
+  ## Working in bulk
 
-  ## Adding Messages
+  ### Adding Messages
 
   To add multiple messages to the queue, use the `add_many/2` function:
 
@@ -79,7 +79,7 @@ defmodule MongoQueue do
   {:ok, message_ids} = MongoQueue.add_many(config, [%{foo: "bar"}, %{foo: "baz"}])
   ```
 
-  ## Receiving Messages
+  ### Receiving Messages
 
   To receive multiple messages from the queue, use the `get_many/2` function:
 
@@ -89,7 +89,7 @@ defmodule MongoQueue do
 
   Note: This function performs a multi-document transaction. See the warning on the `get_many/2` function for more information.
 
-  ## Acknowledging Messages
+  ### Acknowledging Messages
 
   To acknowledge multiple messages, use the `ack/2` function, with a list of ack IDs:
 
@@ -101,24 +101,24 @@ defmodule MongoQueue do
 
   A few methods are provided to help you observe the state of the queue.
 
-  ## Total Messages
+  ### Total Messages
 
   The `total/1` function returns the number of messages that have been added to the queue, regardless of their status.
   This will not include messages that have been deleted by `clean/1`.
 
-  ## Size
+  ### Size
 
   The `size/1` function returns the number of messages that are currently enqueued and visible.
 
-  ## In Flight
+  ### In Flight
 
   The `in_flight/1` function returns the number of messages that have been received from the queue but not yet acknowledged.
 
-  ## Done
+  ### Done
 
   The `done/1` function returns the number of messages that have been acknowledged but not yet deleted.
 
-  # Cleaning Up
+  ## Cleaning Up
 
   From time to time, it may be necessary to clean up the queue collection.
   To do this, run the `clean/1` function.
