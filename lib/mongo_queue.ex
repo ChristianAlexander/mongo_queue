@@ -280,6 +280,8 @@ defmodule MongoQueue do
       iex> MongoQueue.ack(config, [ack1, ack2])
       :ok
   """
+  @spec ack(Config.t(), BSON.ObjectId.t() | [BSON.ObjectId.t()], Keyword.t()) ::
+          :ok | {:error, any()}
   def ack(config, ack_or_acks, opts \\ [])
 
   def ack(%Config{} = config, acks, opts) when is_list(acks) do
@@ -320,6 +322,7 @@ defmodule MongoQueue do
       iex> MongoQueue.nack(config, ack)
       :ok
   """
+  @spec nack(Config.t(), BSON.ObjectId.t(), Keyword.t()) :: :ok | {:error, any()}
   def nack(%Config{} = config, ack, opts \\ []) do
     config = Config.merge(config, opts)
 
