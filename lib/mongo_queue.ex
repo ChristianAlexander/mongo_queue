@@ -3,6 +3,127 @@ defmodule MongoQueue do
   A queue implementation using MongoDB.
 
   Inspired by the [NPM mongodb-queue package](https://www.npmjs.com/package/mongodb-queue).
+
+  # Getting Started
+
+  ## Config
+
+  To use MongoQueue, you must first create a queue configuration.
+  This configuration requires a connection to a MongoDB database, and the name of the collection to use for the queue.
+
+  To connect to Mongo, consult the [`mongodb_driver` docs](https://hexdocs.pm/mongodb_driver/readme.html).
+
+  For example:
+
+  ```elixir
+  {:ok, conn} = Mongo.start_link(url: "mongodb://localhost:27017/my-database")
+  ```
+
+  Then, create a queue configuration:
+
+  ```elixir
+  config = MongoQueue.Config.new(conn, "my_queue")
+  ```
+
+  Configuration options are described in detail in the `MongoQueue.Config` module.
+
+  ## Creating Indexes
+
+  To ensure high performance for the queue, you create indexes on the queue collection.
+  This only needs to be run once per queue.
+
+  ```elixir
+  :ok = MongoQueue.create_indexes(config)
+  ```
+
+  ## Adding Messages
+
+  To add a message to the queue, use the `add/2` function:
+
+  ```elixir
+  {:ok, message_id} = MongoQueue.add(config, %{foo: "bar"})
+  ```
+
+  ## Receiving Messages
+
+  To receive a message from the queue, use the `get/1` function:
+
+  ```elixir
+  {:ok, message} = MongoQueue.get(config)
+  ```
+
+  By default, messages are claimed for 30 seconds.
+  If they are not acknowledged within that time, they will become available to be received again.
+
+  To customize this timeout, use the `visibility_timeout` option:
+
+  ```elixir
+  {:ok, message} = MongoQueue.get(config, visibility_timeout: 60)
+  ```
+
+  ## Acknowledging Messages
+
+  When the message has finished processing, call the `ack/2` function:
+
+  ```elixir
+  :ok = MongoQueue.ack(config, message.ack)
+  ```
+
+  # Working with multiple messages at once
+
+  ## Adding Messages
+
+  To add multiple messages to the queue, use the `add_many/2` function:
+
+  ```elixir
+  {:ok, message_ids} = MongoQueue.add_many(config, [%{foo: "bar"}, %{foo: "baz"}])
+  ```
+
+  ## Receiving Messages
+
+  To receive multiple messages from the queue, use the `get_many/2` function:
+
+  ```elixir
+  {:ok, messages} = MongoQueue.get_many(config, 2)
+  ```
+
+  Note: This function performs a multi-document transaction. See the warning on the `get_many/2` function for more information.
+
+  ## Acknowledging Messages
+
+  To acknowledge multiple messages, use the `ack/2` function, with a list of ack IDs:
+
+  ```elixir
+  :ok = MongoQueue.ack(config, [message1.ack, message2.ack])
+  ```
+
+  # Statistics
+
+  A few methods are provided to help you observe the state of the queue.
+
+  ## Total Messages
+
+  The `total/1` function returns the number of messages that have been added to the queue, regardless of their status.
+  This will not include messages that have been deleted by `clean/1`.
+
+  ## Size
+
+  The `size/1` function returns the number of messages that are currently enqueued and visible.
+
+  ## In Flight
+
+  The `in_flight/1` function returns the number of messages that have been received from the queue but not yet acknowledged.
+
+  ## Done
+
+  The `done/1` function returns the number of messages that have been acknowledged but not yet deleted.
+
+  # Cleaning Up
+
+  From time to time, it may be necessary to clean up the queue collection.
+  To do this, run the `clean/1` function.
+
+  This function deletes all messages that have been acknowledged.
   """
 
   alias Mongo.UnorderedBulk
