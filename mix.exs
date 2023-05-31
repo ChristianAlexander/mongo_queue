@@ -4,7 +4,7 @@ defmodule MongoQueue.MixProject do
   def project do
     [
       app: :mongo_queue,
-      version: "0.0.1",
+      version: "0.0.2",
       start_permanent: Mix.env() == :prod,
       package: package(),
       deps: deps(),
